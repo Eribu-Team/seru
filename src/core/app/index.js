@@ -1,0 +1,7 @@
+import fastify from "fastify";
+import MainApp from "./MainApp";
+import config from "../../config/server";
+
+const app = new MainApp(fastify(config));
+const logger = app.fastify.log;
+export { app, logger };
