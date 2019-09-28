@@ -19,7 +19,20 @@ class MainApp {
     this.fastify = fastify;
     /** Contaniner for controllers */
     this.controllers = [];
+    this.hooks();
     this.registers();
+  }
+
+  hooks() {
+    this.fastify.addHook("onRoute", (routeOptions) => {
+      this.fastify.log.info("new route:",
+        routeOptions.method,
+        routeOptions.schema,
+        routeOptions.url,
+        routeOptions.bodyLimit,
+        routeOptions.logLevel,
+        routeOptions.prefix);
+    });
   }
 
   /**
@@ -35,8 +48,8 @@ class MainApp {
      * Wait for all Controllers and routes are initialized.
      */
     await this.registersControllers();
-    const modules = new Modules();
-    await modules.readConfigs();
+    const modules = new Modules(this);
+    await modules.init();
     /**
      * Listen connections...
      */
@@ -50,7 +63,7 @@ class MainApp {
     files.forEach(async (file) => {
       const controller = await import(path.join(controllersPath, file));
       if ((controller || {}).default) {
-        const instance = new (controller.default)();// eslint-disable-line
+        const instance = new controller.default(); // eslint-disable-line
         this.controllers.push(instance);
         this.registerControlerRoutes(instance);
       }
@@ -99,9 +112,9 @@ class MainApp {
 
   registersPlugins() {
     this.fastify.register(cors);
-    this.fastify.register(products, {
-      prefix: "/products",
-    });
+    //this.fastify.register(products, {
+    //  prefix: "/products",
+    //});
   }
 
   async registerDb() {
