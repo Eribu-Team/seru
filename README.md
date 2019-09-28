@@ -1,3 +1,3 @@
-# frameworkwatch
+# Seru
 
-frameworkwatch
+Nodejs backend framework
