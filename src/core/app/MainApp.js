@@ -14,11 +14,12 @@ class MainApp {
 
   modulesDir = path.join(`${this.baseDir}/modules`);
 
+  /** Contaniner for controllers */
+  controllers = [];
+
   constructor(fastify) {
     fastify.log.info("MainApp::booting");
     this.fastify = fastify;
-    /** Contaniner for controllers */
-    this.controllers = [];
     this.hooks();
     this.registers();
   }
@@ -47,7 +48,8 @@ class MainApp {
     /**
      * Wait for all Controllers and routes are initialized.
      */
-    await this.registersControllers();
+    // await this.registersControllers();
+
     const modules = new Modules(this);
     await modules.init();
     /**
@@ -112,9 +114,11 @@ class MainApp {
 
   registersPlugins() {
     this.fastify.register(cors);
-    //this.fastify.register(products, {
+
+
+    // this.fastify.register(products, {
     //  prefix: "/products",
-    //});
+    // });
   }
 
   async registerDb() {

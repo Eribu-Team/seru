@@ -1,6 +1,6 @@
 import Product from "../models/Product";
 
-class ProductController {
+class UserController {
   /**
    * async index - get models collection with filter
    *
@@ -63,4 +63,4 @@ class ProductController {
   }
 }
 
-export default ProductController;
+export default UserController;
