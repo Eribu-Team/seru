@@ -53,6 +53,6 @@
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jsdoc": "^15.9.10",
     "nodemon": "^1.19.3",
-    "pino-pretty": "^3.2.1"
+    "pino-pretty": "^3.2.2"
   }
 }

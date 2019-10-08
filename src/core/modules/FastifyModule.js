@@ -5,7 +5,7 @@ import Filesystem from "../libs/helpers/Filesystem";
 
 
 /**
- * @typedef {function} FastifyInstance
+ * @typedef {Function} FastifyInstance
  */
 export default class FastifyModule {
   config = null;
@@ -36,14 +36,14 @@ export default class FastifyModule {
     if (await Filesystem.readable(moduleIndexPath)) {
       const moduleIndex = await import(moduleIndexPath);
       if ((moduleIndex || {}).default) {
-        this.app.fastify.register(this.getModule, {
+        this.app.fastify.register(this.getModule(), {
           prefix: config.uri,
           routes: await this.getRoutes(),
+          moduleDir,
         });
       }
     }
   }
-
 
   /**
    * Async getRoutes - description.
@@ -61,15 +61,23 @@ export default class FastifyModule {
     return [];
   }
 
+  async registerControllers(moduleDir, fastify) {
+    console.log("registerControllers:", moduleDir, fastify);
+  }
+
   /**
-   * Returns Fastify plgin function for current module
+   * Returns Fastify plgin function for current module.
+   *
    * @param {FastifyInstance} Fastify
    */
-  getModule(fastify, options, done) {
+  async getModule(fastify, options, done) {
     console.log("Module options", options);
+
     fastify.get("/plugin", (request, reply) => {
       reply.send({ hello: "world" });
     });
+
+    this.registerControllers(options.moduleDir, fastify);
 
     // const module = new Module(__dirname).register();
     console.log("module from plugin", this, __dirname);
