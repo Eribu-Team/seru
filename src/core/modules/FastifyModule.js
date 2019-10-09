@@ -1,5 +1,6 @@
 
 import path from "path";
+import fs from "fs";
 import Filesystem from "../libs/helpers/Filesystem";
 // import store from "../store";
 
@@ -15,7 +16,7 @@ export default class FastifyModule {
   dirname = null;
 
   constructor(dirname, app) {
-    this.dirname = dirname;
+    this.dirname = dirname; // TODO: check if readable
     this.app = app;
   }
 
@@ -26,23 +27,42 @@ export default class FastifyModule {
       const configFileExport = await import(configFilePath);
       // only if its default export and active
       if ((configFileExport || {}).default && this.isActive(configFileExport.default)) {
-        await this.registerFastifyModule(this.dirname, configFileExport.default);
+        await this.registerFastifyModule(configFileExport.default);
       }
     }
   }
 
-  async registerFastifyModule(moduleDir, config) {
-    const moduleIndexPath = path.join(moduleDir, "/index.js");
-    if (await Filesystem.readable(moduleIndexPath)) {
-      const moduleIndex = await import(moduleIndexPath);
-      if ((moduleIndex || {}).default) {
-        this.app.fastify.register(this.getModule(), {
-          prefix: config.uri,
-          routes: await this.getRoutes(),
-          moduleDir,
-        });
-      }
-    }
+  async registerFastifyModule(config) {
+    const controllersPath = path.join(this.dirname, "/controllers");
+    this.app.fastify.log.info("Scanning controllers path:", controllersPath);
+    const files = fs.readdirSync(controllersPath);
+
+    console.log("Controllers files:", files);
+
+    await files.reduce(
+      async (prev, file) => {
+        await prev;
+        const controller = await import(path.join(controllersPath, file));
+        if ((controller || {}).default) {
+          const instance = new (controller.default)();// eslint-disable-line
+          console.log(Object.getOwnPropertyNames(instance));
+          this.app.fastify.log.info("Found controller:", instance);
+          //await this.registerControlerRoutes(instance, this.dirname);
+        }
+      }, Promise.resolve(),
+    );
+
+    // if (await Filesystem.readable(controllersPath)) {
+    //   const moduleIndex = await import(moduleIndexPath);
+    //   if ((moduleIndex || {}).default) {
+    //     console.log("Plugin cb: ", await this.getModule());
+    //     this.app.fastify.register(await this.getModule(), {
+    //       prefix: config.uri,
+    //       routes: await this.getRoutes(),
+    //       moduleDir,
+    //     });
+    //   }
+    // }
   }
 
   /**
@@ -68,20 +88,25 @@ export default class FastifyModule {
   /**
    * Returns Fastify plgin function for current module.
    *
-   * @param {FastifyInstance} Fastify
+   * @param {FastifyInstance} fastify - Fastify Instance.
+   * @param {object} options - Options passed by plugin register.
+   * @param {Function} done - Done callback.
    */
-  async getModule(fastify, options, done) {
-    console.log("Module options", options);
+  async getModule() {
+    const moduleCb = (fastify, options, done) => {
+      fastify.get("/plugin", (request, reply) => {
+        reply.send({ hello: "world" });
+      });
+      done();
+    };
+    return moduleCb;
+    // console.log("Module options", options);
 
-    fastify.get("/plugin", (request, reply) => {
-      reply.send({ hello: "world" });
-    });
 
-    this.registerControllers(options.moduleDir, fastify);
+    // this.registerControllers(options.moduleDir, fastify);
 
     // const module = new Module(__dirname).register();
-    console.log("module from plugin", this, __dirname);
-    done();
+    // console.log("module from plugin", this, __dirname);
   }
 
   isActive(obj) {

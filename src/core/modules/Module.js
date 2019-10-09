@@ -5,7 +5,7 @@ import Filesystem from "../libs/helpers/Filesystem";
 
 
 /**
- * Universal node module for Seru mvc
+ * Universal node module for Seru mvc.
  */
 export default class Module {
   config = null;
@@ -20,9 +20,9 @@ export default class Module {
   }
 
   /**
-   * async register - register current module
+   * Async register - register current module.
    *
-   * @return {type}  description
+   * @returns {type}  Description.
    */
   async register() {
     console.log("module register: ", this.dirname);
@@ -44,9 +44,9 @@ export default class Module {
   }
 
   /**
-   * async registersControllers - Register module controllers
+   * Async registersControllers - Register module controllers.
    *
-   * @return {type}  description
+   * @returns {type}  Description.
    */
   async registerControllers(moduleDir) {
     const controllersPath = path.join(moduleDir, "/controllers");
