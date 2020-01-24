@@ -48,8 +48,7 @@ export default class Modules {
         const dirname = path.join(this.app.modulesDir, file);
         const dirent = await fsp.stat(dirname);
         this.app.fastify.log.info("Looking for Module in directory:", dirname, dirent.isDirectory());
-        if (dirent.isDirectory()) {
-          // console.log(this.app);
+        if (dirent.isDirectory()) {        
           const module = new Module(dirname, this.app);
           await module.register();
         }
